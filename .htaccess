@@ -1,0 +1,7 @@
+RewriteEngine on
+
+RewriteRule ^(thumbs/)(\d+x\d+)\/(\w+)\/.*\/(\w+)(\.\w+)$ $1thumb-$2-$3-$4$5
+
+ErrorDocument 404 /Thumbnail-resize.php
+
+AddDefaultCharset utf-8
