@@ -215,7 +215,8 @@ class Thumbnail {
   */
 	public static function link($src, $newWidth=0, $newHeight=0, $mode=self::MODE_SCALE) {
         $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
-        echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+        //echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+        return $string;
 }
 
 /**
