@@ -237,11 +237,17 @@ class Thumbnail {
   *чтобы сервер уже не будет запускать для этого медленный PHP-скрипт. 
   */
 	public static function link($src, $newWidth=0, $newHeight=0, $mode=self::MODE_SCALE) {
+<<<<<<< HEAD
 
        //  $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
         $string = self::$thumbDir . "/{$newWidth}x{$newHeight}/{$mode}/{$src}";
         echo "<img src=\"$string\" alt=\"some alt text\" />";
        // echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+=======
+        $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
+        //echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+        return $string;
+>>>>>>> 02483f73cd9774015247449ff9e4eb65f32615c8
 }
 
 /**
