@@ -9,7 +9,26 @@ class Thumbnail {
   private static $srcName;
   private static $newName = "";
   private static $newPic;
-  public static $type;
+  private static $type;
+  private static $origDir = "uploads";
+  private static $thumbDir = "thumbs";
+
+  public static function getType() {
+    return self::$type;
+  }
+  public static function getOrigDir() {
+    return self::$origDir;
+  }
+  public static function setOrigDir($value) {
+    self::$origDir = $value;
+  }
+  public static function getThumbDir() {
+    return self::$thumbDir;
+  }
+  public static function setThumbDir($value) {
+    self::$thumbDir = $value;
+  }
+
   protected static function setNewName($src, $newWidth, $newHeight, $mode) {
     /**
    *найдём исходное имя картинки
@@ -106,7 +125,8 @@ class Thumbnail {
   *методу saveToFile c параметром $copy = true.
   */
   private static function createThumbScale($src, $width, $height, $newWidth, $newHeight) {
-    $newPath = "thumbs/" . self::$newName;
+    //$newPath = "thumbs/" . self::$newName;
+    $newPath = self::$thumbDir . DIRECTORY_SEPARATOR . self::$newName;
   /**
   *найдем коэффициент уменьшения
   *он будет одним и тем же для ширины и высоты если MODE_SCALE
@@ -139,7 +159,8 @@ class Thumbnail {
   }
 
   private static function createThumbCrop($src, $width, $height, $newWidth, $newHeight) {
-     $newPath = "thumbs/" . self::$newName;
+    // $newPath = "thumbs/" . self::$newName;
+     $newPath = self::$thumbDir . DIRECTORY_SEPARATOR . self::$newName;
 
      $factor = (($width/$newWidth) < ($height/$newHeight)) ? ($width/$newWidth) : ($height/$newHeight);
   if ($factor>=1) {
@@ -166,7 +187,9 @@ class Thumbnail {
     */
     $dst = imagecreatetruecolor($dstW, $dstH);
     imagecopyresampled($dst, self::$srcPic, 0, 0, 0, 0, $dstW, $dstH, $width, $height);
-    $temp = "thumbs/temp_" . self::$srcName;
+
+   // $temp = "thumbs/temp_" . self::$srcName;
+    $temp = self::$thumbDir . DIRECTORY_SEPARATOR . "temp_" . self::$srcName;
     $tempPath = self::saveToFile($dst, self::$type, $temp);
     imagedestroy($dst);
     $im = self::getSrcPic($tempPath, self::$type);
@@ -214,8 +237,11 @@ class Thumbnail {
   *чтобы сервер уже не будет запускать для этого медленный PHP-скрипт. 
   */
 	public static function link($src, $newWidth=0, $newHeight=0, $mode=self::MODE_SCALE) {
-        $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
-        echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+
+       //  $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
+        $string = self::$thumbDir . "/{$newWidth}x{$newHeight}/{$mode}/{$src}";
+        echo "<img src=\"$string\" alt=\"some alt text\" />";
+       // echo "small picture is here <a href=\"{$string}\">{$string}</a>";
 }
 
 /**
