@@ -16,8 +16,6 @@ if (preg_match($srcPattern, urldecode($original), $params)) {
   $newWidth = $params[1];
   $newHeight = $params[2];
   $mode = $params[3];
-}
-
 //var_dump($src);
 /*
 var_dump($newWidth);
@@ -33,3 +31,4 @@ $brandNewPic = Thumbnail::resize($src, $newWidth, $newHeight, $mode);
 //header("$proto 200 OK Created");
 Thumbnail::sendHeader(Thumbnail::getType());
 readfile($brandNewPic);
+}

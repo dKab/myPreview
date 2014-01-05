@@ -191,7 +191,7 @@ class Thumbnail {
    /**
    *Если картинка горизонтальная
    */
-    if ( ($dstW > $newWidth) && ($newWidth != 0) ) {
+    if ( ($dstW >= $newWidth) && ($newWidth != 0) ) {
       /**
       *обрезаем справа и слева
       */      
@@ -201,7 +201,7 @@ class Thumbnail {
    /**
    *Если картинка вертикальная
    */
-    elseif ( ($dstH > $newHeight) && ($newHeight != 0 ) ) {
+    elseif ( ($dstH >= $newHeight) && ($newHeight != 0 ) ) {
       /**
       *обрезаем cверху и снизу
       */
