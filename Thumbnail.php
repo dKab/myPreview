@@ -1,12 +1,11 @@
 <?php
 error_reporting(-1);
-mb_internal_encoding('utf-8');
-
 class Thumbnail {
   const MODE_SCALE = "scale";
   const MODE_CROP = "crop";
   private static $srcPic;
   private static $srcName;
+  private static $srcExt;
   private static $newName = "";
   private static $newPic;
   private static $type;
@@ -34,16 +33,21 @@ class Thumbnail {
    *найдём исходное имя картинки
    */
    $subfolders = explode("/", $src);
+   //$subfolders = preg_split("!\\/|\\\\!ui", $src, -1,  PREG_SPLIT_NO_EMPTY);
    $srcName = array_pop($subfolders);
-   
-   $pattern = "/([\\-\\s\\w]+).(\\w+)/ui";
-   $srcName = preg_replace($pattern, '${1}', $srcName);
-   self::$srcName = $srcName;
+   //var_dump($srcName);
+   $pattern = "/([\\-\\s\\w]+)(\\.\\w+)/ui";
+   $Name = preg_replace($pattern, '${1}', $srcName);
+   //var_dump($Name);
+   $ext  = preg_replace($pattern, '${2}', $srcName);
+   //var_dump($ext);
+   self::$srcName = $Name;
+   self::$srcExt = $ext;
 
    /**
    *используем его в новом имени для превьюшки
    */
-   return self::$newName = "thumb-{$newWidth}x{$newHeight}-{$mode}-$srcName";
+   return self::$newName = "thumb-{$newWidth}x{$newHeight}-{$mode}-" . self::$srcName;
   }
   
   /*Создаёт новое изображение из исходного*/
@@ -58,7 +62,7 @@ class Thumbnail {
           $im = imagecreatefrompng($src);
         }
         else {
-          throw new Exception("Данный формат не поддерживатся");
+          throw new myPreviewException("Данный формат {$type} не поддерживатся");
         }
         return $im;
   }
@@ -68,36 +72,27 @@ class Thumbnail {
  *в папку назначения. 
  */
   private static function saveToFile($pic, $type, $saveTo, $copy=false) {
-    if ( $pic == null) {
-      throw new Exception("wrong argument type given", 1);
+    if ($pic == null) {
+      throw new myPreviewException("Wrong argument type!. Thumbnail::savatoFile() first param expecting to be filename, null given ");
     }
-    switch ($type) {
-    case IMAGETYPE_GIF:
-      $path = $saveTo . ".gif";
-      if (!$copy) {
-      imagegif($pic, $path);
-      } else {
-        copy($pic, $path);
-      }
-      break;
-    case IMAGETYPE_JPEG:
-      $path = $saveTo . ".jpg";
-      if (!$copy) {
-      imagejpeg($pic, $path);
-      } else {
-        copy($pic, $path);
-      }
-      break;
-    case IMAGETYPE_PNG:
-      $path = $saveTo . ".png";
-      if (!$copy) {
-      imagepng($pic, $path);
-      } else {
-        copy($pic, $path);
-      }
-      break;
-    default:
-     throw new Exception("Данный формат не поддерживатся", 1);
+    //$ext = image_type_to_extension($type);
+    $path = $saveTo . self::$srcExt;
+    if ($copy) {
+      copy($pic, $path);
+    } else {
+        switch ($type) {
+        case IMAGETYPE_GIF:
+          imagegif($pic, $path);
+          break;
+        case IMAGETYPE_JPEG:
+          imagejpeg($pic, $path);
+          break;
+        case IMAGETYPE_PNG:
+          imagepng($pic, $path);
+          break;
+        default:
+          throw new myPreviewException("Данный формат {$type} не поддерживатся");
+        }
     }
     return $path;
   }
@@ -114,7 +109,7 @@ class Thumbnail {
          header('Content-Type: image/png');
       break;
     }
-  }  
+  }
 
   /**методы createThumbScale и createThumbCrop
   *выполняют всю работу по созданию уменьшенной копии.
@@ -151,7 +146,8 @@ class Thumbnail {
   }
   elseif ($factor <= 1) {
     /**
-    *возвращаем исходное изображение, а точнее его копию
+    *Если нет необходимости уменьшать,
+    *возвращаем исходное изображение, а точнее его копию.
     */
     $path = self::saveToFile($src, self::$type, $newPath, true);
   }
@@ -159,7 +155,6 @@ class Thumbnail {
   }
 
   private static function createThumbCrop($src, $width, $height, $newWidth, $newHeight) {
-    // $newPath = "thumbs/" . self::$newName;
      $newPath = self::$thumbDir . DIRECTORY_SEPARATOR . self::$newName;
 
      $factor = (($width/$newWidth) < ($height/$newHeight)) ? ($width/$newWidth) : ($height/$newHeight);
@@ -218,7 +213,8 @@ class Thumbnail {
     imagedestroy(self::$newPic);
   } elseif ($factor < 1) {
     /**
-    *возвращаем исходное изображение, а точнее его копию
+    *Если изображение итак достаточно мало,
+    *возвращаем исходное изображение, а точнее его копию.
     */
     $path = self::saveToFile($src, self::type, $newPath, true);
   }
@@ -237,41 +233,39 @@ class Thumbnail {
   *чтобы сервер уже не будет запускать для этого медленный PHP-скрипт. 
   */
 	public static function link($src, $newWidth=0, $newHeight=0, $mode=self::MODE_SCALE) {
-<<<<<<< HEAD
-
-       //  $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
         $string = self::$thumbDir . "/{$newWidth}x{$newHeight}/{$mode}/{$src}";
-        echo "<img src=\"$string\" alt=\"some alt text\" />";
-       // echo "small picture is here <a href=\"{$string}\">{$string}</a>";
-=======
-        $string = "thumbs/{$newWidth}x{$newHeight}/{$mode}/{$src}";
-        //echo "small picture is here <a href=\"{$string}\">{$string}</a>";
-        return $string;
->>>>>>> 02483f73cd9774015247449ff9e4eb65f32615c8
+       echo "<img src=\"$string\" alt=\"some alt text\" />";
+       // return $string;
+     //echo "small picture is here <a href=\"{$string}\">{$string}</a>";
+     // echo "small picture is here <a href=" . urlencode($string) . ">{$string}</a>";
 }
-
 /**
 *есть 2 режима уменьшения, когда, например, мы пытаемся вписать картинку
 * 1000×200 в квадрат 100×100: CROP — уменьшает картинку до 500×100 и отрезает
 * правую и левую части, SCALE — уменьшает картинку до 100×20
 */
 public static function resize($src, $newWidth, $newHeight, $mode) {
-           if (file_exists($src)) {
+           if (file_exists($src) && getimagesize($src)) {
         list($width, $height, self::$type) = getimagesize($src);
     }
     else {
-      throw new Exception("Исходный файл не найден", 1); 
+      if (!file_exists($src)) {
+        throw new myPreviewException("Исходный файл {$src} не найден");
+      } elseif (!getimagesize($src)) {
+          throw new myPreviewException("файл {$src} не является изображением поддерживаемого формата"); 
+      }
     }
             if (!$width || !$height) {
-          throw new Exception("Данный формат не поддерживатся");
+          throw new myPreviewException("Данный формат не поддерживатся");
         } 
         self::$srcPic = self::getSrcPic($src, self::$type);
         self::setNewName($src, $newWidth, $newHeight, $mode);
         if ($mode == self::MODE_SCALE) {
           $path = self::createThumbScale($src, $width, $height, $newWidth, $newHeight);
-        }
-        elseif ($mode == self::MODE_CROP) {
+        } elseif ($mode == self::MODE_CROP) {
           $path = self::createThumbCrop($src, $width, $height, $newWidth, $newHeight);
+        } else {
+          throw new myPreviewException("Параметр $mode, переданный методу Thumbnail::resize, не верный.");
         }
         return $path;
 }
