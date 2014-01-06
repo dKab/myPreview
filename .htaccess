@@ -1,5 +1,7 @@
 RewriteEngine on
 
+RewriteCond %{REQUEST_FILENAME} -f 
+
 RewriteRule ^(thumbs/)(\d+x\d+)\/(\w+)\/.*\/(\w+)(\.\w+)$ $1thumb-$2-$3-$4$5
 
 ErrorDocument 404 /Thumbnail-resize.php
